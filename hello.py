@@ -14,19 +14,34 @@ moment = Moment(app)
 @app.route("/", methods=["GET", "POST"])
 def index():
     form = NameForm()
+
     if form.validate_on_submit():
 
         old_name = session.get("name")
-        if old_name is not None and old_name != form.name.data:
+        old_email = session.get("email")
+        new_name = form.name.data
+        new_email = form.email.data
+
+        if old_name is not None and old_name != new_name:
             flash("Looks like you have changed your name!")
-        
-        session["name"] = form.name.data
+        if old_email is not None and old_email != new_email:
+            flash("Looks like you have changed your email!")
+
+        session["name"] = new_name
+        session["email"] = new_email
+
+        if "utoronto" in new_email:
+            session["message"] = f"Your UofT email is {new_email}"
+        else:
+            session["message"] = "Please use your UofT email."
+
         return redirect(url_for("index"))
 
     return render_template(
         "index.html",
         name=session.get("name"),
         form=form,
+        message=session.get("message"),
     )
 
 
